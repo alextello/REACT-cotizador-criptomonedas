@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import useMondeda from '../hooks/useMoneda';
 import useCriptomoneda from '../hooks/useCriptomoneda';
 import axios from 'axios';
+import Error from './Error';
 
 const Boton = styled.input`
 	margin-top: 20px;
@@ -23,13 +24,13 @@ const Boton = styled.input`
 	}
 `;
 
-const Formulario = (props) => {
+const Formulario = ({ setMoneda, setCriptomoneda }) => {
 	// state del estado de criptomonedas
 	const [listaCripto, setListaCripto] = useState([]);
+	const [error, setError] = useState(false);
 
 	const MONEDAS = [
 		{ codigo: 'USD', nombre: 'Dolar estadounidense' },
-		{ codigo: 'GTM', nombre: 'Quetzal' },
 		{ codigo: 'EUR', nombre: 'Euro' },
 		{ codigo: 'GBP', nombre: 'Libra Esterlina' },
 	];
@@ -47,8 +48,25 @@ const Formulario = (props) => {
 		};
 		consultarAPI();
 	}, []);
+
+	// cuando el usuario hace submit
+	const cotizarMoneda = (e) => {
+		e.preventDefault();
+
+		// Validar ambos campos
+		if (moneda === '' || cripto === '') {
+			setError(true);
+			return;
+		}
+
+		// pasar datos a componente principal
+		setError(false);
+		setMoneda(moneda);
+		setCriptomoneda(cripto);
+	};
 	return (
-		<form>
+		<form onSubmit={cotizarMoneda}>
+			{error ? <Error mensaje="Hubo un error" /> : null}
 			<SeleccionarMoneda />
 			<SelectCripto />
 			<Boton type="submit" value="Calcular"></Boton>
@@ -56,6 +74,9 @@ const Formulario = (props) => {
 	);
 };
 
-Formulario.propTypes = {};
+Formulario.propTypes = {
+	setMoneda: PropTypes.func.isRequired,
+	setCriptomoneda: PropTypes.func.isRequired,
+};
 
 export default Formulario;
